@@ -1,17 +1,11 @@
 ﻿namespace Oid85.QueueBackgroundWorkSample.WebHost;
 
-public class QueuedHostedService : BackgroundService
+public class QueuedHostedService(
+    IBackgroundTaskQueue taskQueue,
+    ILogger<QueuedHostedService> logger)
+    : BackgroundService
 {
-    private readonly ILogger<QueuedHostedService> _logger;
-
-    public QueuedHostedService(IBackgroundTaskQueue taskQueue, 
-        ILogger<QueuedHostedService> logger)
-    {
-        TaskQueue = taskQueue;
-        _logger = logger;
-    }
-
-    public IBackgroundTaskQueue TaskQueue { get; }
+    private IBackgroundTaskQueue TaskQueue { get; } = taskQueue;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -22,17 +16,16 @@ public class QueuedHostedService : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var workItem = 
-                await TaskQueue.DequeueAsync(stoppingToken);
+            var workItem = await TaskQueue.DequeueAsync(stoppingToken);
 
             try
             {
-                await workItem(stoppingToken);
+                await workItem();
             }
             
             catch (Exception ex)
             {
-                _logger.LogError(ex, 
+                logger.LogError(ex, 
                     "Error occurred executing {WorkItem}.", nameof(workItem));
             }
         }
@@ -40,7 +33,7 @@ public class QueuedHostedService : BackgroundService
 
     public override async Task StopAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Queued Hosted Service is stopping.");
+        logger.LogInformation("Queued Hosted Service is stopping.");
 
         await base.StopAsync(stoppingToken);
     }

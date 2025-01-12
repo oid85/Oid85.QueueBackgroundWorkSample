@@ -4,7 +4,7 @@ namespace Oid85.QueueBackgroundWorkSample.WebHost;
 
 public class BackgroundTaskQueue : IBackgroundTaskQueue
 {
-    private readonly Channel<Func<CancellationToken, Task>> _queue;
+    private readonly Channel<Func<Task>> _queue;
 
     public BackgroundTaskQueue(int capacity)
     {
@@ -17,11 +17,11 @@ public class BackgroundTaskQueue : IBackgroundTaskQueue
         {
             FullMode = BoundedChannelFullMode.Wait
         };
-        _queue = Channel.CreateBounded<Func<CancellationToken, Task>>(options);
+        
+        _queue = Channel.CreateBounded<Func<Task>>(options);
     }
 
-    public async Task QueueBackgroundWorkItemAsync(
-        Func< CancellationToken, Task> workItem)
+    public async Task QueueBackgroundWorkItemAsync(Func<Task> workItem)
     {
         if (workItem == null)
         {
@@ -31,8 +31,7 @@ public class BackgroundTaskQueue : IBackgroundTaskQueue
         await _queue.Writer.WriteAsync(workItem);
     }
 
-    public async Task<Func<CancellationToken, Task>> DequeueAsync(
-        CancellationToken cancellationToken)
+    public async Task<Func<Task>> DequeueAsync(CancellationToken cancellationToken)
     {
         var workItem = await _queue.Reader.ReadAsync(cancellationToken);
 

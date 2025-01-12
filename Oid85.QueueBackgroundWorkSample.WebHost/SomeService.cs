@@ -2,7 +2,7 @@
 
 public class SomeService(ILogger<SomeService> logger)
 {
-    public async Task DoWork(CancellationToken cancellationToken)
+    public async Task DoWork()
     {
         await Task.Delay(10_000);
         
