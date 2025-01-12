@@ -21,7 +21,7 @@ public class BackgroundTaskQueue : IBackgroundTaskQueue
     }
 
     public async Task QueueBackgroundWorkItemAsync(
-        Func<CancellationToken, Task> workItem)
+        Func< CancellationToken, Task> workItem)
     {
         if (workItem == null)
         {

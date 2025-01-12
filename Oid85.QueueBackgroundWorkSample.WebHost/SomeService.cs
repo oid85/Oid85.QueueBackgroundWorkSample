@@ -6,6 +6,6 @@ public class SomeService(ILogger<SomeService> logger)
     {
         await Task.Delay(10_000);
         
-        logger.LogInformation("DoWork completed");
+        logger.LogInformation($"DoWork completed");
     }
 }
