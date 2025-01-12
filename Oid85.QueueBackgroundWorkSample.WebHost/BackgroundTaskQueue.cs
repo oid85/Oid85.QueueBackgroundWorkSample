@@ -31,9 +31,9 @@ public class BackgroundTaskQueue : IBackgroundTaskQueue
         await _queue.Writer.WriteAsync(workItem);
     }
 
-    public async Task<Func<Task>> DequeueAsync(CancellationToken cancellationToken)
+    public async Task<Func<Task>> DequeueAsync()
     {
-        var workItem = await _queue.Reader.ReadAsync(cancellationToken);
+        var workItem = await _queue.Reader.ReadAsync();
 
         return workItem;
     }

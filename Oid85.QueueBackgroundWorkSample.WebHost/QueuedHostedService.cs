@@ -16,7 +16,7 @@ public class QueuedHostedService(
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var workItem = await TaskQueue.DequeueAsync(stoppingToken);
+            var workItem = await TaskQueue.DequeueAsync();
 
             try
             {
