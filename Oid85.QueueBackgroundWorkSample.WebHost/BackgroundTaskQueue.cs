@@ -1,40 +1,26 @@
-﻿using System.Threading.Channels;
+﻿using System.Collections.Concurrent;
+using System.Threading.Channels;
 
 namespace Oid85.QueueBackgroundWorkSample.WebHost;
 
 public class BackgroundTaskQueue : IBackgroundTaskQueue
 {
-    private readonly Channel<Func<Task>> _queue;
+    private readonly SemaphoreSlim _signal = new(0);
+    private readonly ConcurrentQueue<Func<IServiceProvider, CancellationToken, Task>> _workItems = new();
 
-    public BackgroundTaskQueue(int capacity)
+    public void QueueBackgroundWorkItem(Func<IServiceProvider, CancellationToken, Task> workItem)
     {
-        // Capacity should be set based on the expected application load and
-        // number of concurrent threads accessing the queue.            
-        // BoundedChannelFullMode.Wait will cause calls to WriteAsync() to return a task,
-        // which completes only when space became available. This leads to backpressure,
-        // in case too many publishers/calls start accumulating.
-        var options = new BoundedChannelOptions(capacity)
-        {
-            FullMode = BoundedChannelFullMode.Wait
-        };
-        
-        _queue = Channel.CreateBounded<Func<Task>>(options);
+        if (workItem == null) throw new ArgumentNullException(nameof(workItem));
+
+        _workItems.Enqueue(workItem);
+        _signal.Release(); // Signal that a new item is available
     }
 
-    public async Task QueueBackgroundWorkItemAsync(Func<Task> workItem)
+    public async Task<Func<IServiceProvider, CancellationToken, Task>> DequeueAsync(CancellationToken cancellationToken)
     {
-        if (workItem == null)
-        {
-            throw new ArgumentNullException(nameof(workItem));
-        }
+        await _signal.WaitAsync(cancellationToken);
+        _workItems.TryDequeue(out var workItem);
 
-        await _queue.Writer.WriteAsync(workItem);
-    }
-
-    public async Task<Func<Task>> DequeueAsync()
-    {
-        var workItem = await _queue.Reader.ReadAsync();
-
-        return workItem;
+        return workItem!;
     }
 }

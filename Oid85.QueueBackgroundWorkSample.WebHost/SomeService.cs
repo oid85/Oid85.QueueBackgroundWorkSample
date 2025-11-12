@@ -2,10 +2,10 @@
 
 public class SomeService(ILogger<SomeService> logger)
 {
-    public async Task DoWork()
+    public async Task DoWork(int number)
     {
         await Task.Delay(10_000);
         
-        logger.LogInformation($"DoWork completed");
+        logger.LogInformation($"DoWork {number} completed");
     }
 }

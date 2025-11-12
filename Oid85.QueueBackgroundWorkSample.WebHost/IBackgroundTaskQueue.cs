@@ -2,7 +2,6 @@
 
 public interface IBackgroundTaskQueue
 {
-    Task QueueBackgroundWorkItemAsync(Func<Task> workItem);
-
-    Task<Func<Task>> DequeueAsync();
+    void QueueBackgroundWorkItem(Func<IServiceProvider, CancellationToken, Task> workItem);
+    Task<Func<IServiceProvider, CancellationToken, Task>> DequeueAsync(CancellationToken cancellationToken);
 }

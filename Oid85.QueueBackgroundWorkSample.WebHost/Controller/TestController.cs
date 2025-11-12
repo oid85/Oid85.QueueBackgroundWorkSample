@@ -7,7 +7,7 @@ namespace Oid85.QueueBackgroundWorkSample.WebHost.Controller;
 public class TestController(
     ILogger<TestController> logger,
     SomeService someService,
-    IBackgroundTaskQueue backgroundTaskQueue) 
+    IBackgroundTaskQueue taskQueue) 
     : ControllerBase
 {
     /// <summary>
@@ -16,10 +16,27 @@ public class TestController(
     [HttpGet("test")]
     public async Task<IActionResult> TestAsync()
     {
-        await backgroundTaskQueue.QueueBackgroundWorkItemAsync(someService.DoWork);
-        
-        logger.LogInformation("Request is completed");
-        
+        int number = DateTime.Now.Millisecond;
+
+        taskQueue.QueueBackgroundWorkItem(async (serviceProvider, token) =>
+        {
+            var logger = serviceProvider.GetRequiredService<ILogger<TestController>>();
+            var someService = serviceProvider.GetRequiredService<SomeService>();
+
+            logger.LogInformation("Job started");
+
+            try
+            {
+                await someService.DoWork(number);
+                logger.LogInformation("Job completed successfully.");
+            }
+
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while job");
+            }
+        });
+
         return Ok();
     }
 }

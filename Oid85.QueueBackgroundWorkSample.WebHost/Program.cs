@@ -13,10 +13,9 @@ public class Program
         builder.Services.ConfigureCors(builder.Configuration);
 
         builder.Services.AddTransient<SomeService>();
-        builder.Services.AddHostedService<QueuedHostedService>();
-        builder.Services.AddSingleton<IBackgroundTaskQueue>(
-            _ => new BackgroundTaskQueue(100));
-        
+        builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+        builder.Services.AddHostedService<TaskQueueProcessor>();
+
         var app = builder.Build();
         
         app.UseRouting();
