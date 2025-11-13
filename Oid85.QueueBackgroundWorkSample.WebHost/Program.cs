@@ -14,7 +14,7 @@ public class Program
 
         builder.Services.AddTransient<SomeService>();
         builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
-        builder.Services.AddHostedService<TaskQueueProcessor>();
+        builder.Services.AddHostedService<BackgroundTaskQueueProcessor>();
 
         var app = builder.Build();
         

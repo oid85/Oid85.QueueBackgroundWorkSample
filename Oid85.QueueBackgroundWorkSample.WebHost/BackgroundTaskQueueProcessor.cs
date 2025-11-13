@@ -1,17 +1,17 @@
 ﻿namespace Oid85.QueueBackgroundWorkSample.WebHost;
-public class TaskQueueProcessor : BackgroundService
+public class BackgroundTaskQueueProcessor : BackgroundService
 {
     private readonly IBackgroundTaskQueue _taskQueue;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger _logger;
 
-    public TaskQueueProcessor(IBackgroundTaskQueue taskQueue,
+    public BackgroundTaskQueueProcessor(IBackgroundTaskQueue taskQueue,
         IServiceProvider serviceProvider,
         ILoggerFactory loggerFactory)
     {
         _taskQueue = taskQueue;
         _serviceProvider = serviceProvider;
-        _logger = loggerFactory.CreateLogger<TaskQueueProcessor>();
+        _logger = loggerFactory.CreateLogger<BackgroundTaskQueueProcessor>();
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
