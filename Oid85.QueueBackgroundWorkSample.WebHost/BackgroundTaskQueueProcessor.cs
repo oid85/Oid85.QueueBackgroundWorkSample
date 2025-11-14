@@ -21,16 +21,19 @@ public class BackgroundTaskQueueProcessor : BackgroundService
         while (!cancellationToken.IsCancellationRequested)
         {
             var workItem = await _taskQueue.DequeueAsync(cancellationToken);
-
+           
             try
             {
-                await workItem(_serviceProvider, cancellationToken);
+                if (workItem is not null)
+                    _ = Task.Run(() => { workItem(_serviceProvider, cancellationToken); }, cancellationToken);
             }
 
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error occurred executing {nameof(workItem)}.");
             }
+
+            await Task.Delay(1000, cancellationToken);
         }
 
         _logger.LogInformation("Queued Processor Background Service is stopping.");
